@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="PDF Maker - create PDFs from images and text directly in your browser.">
+<meta name="theme-color" content="#2563eb">
+<title>PDF Maker — Image & Text to PDF</title>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;
+  --primary2:#1d4ed8;--border:#e4e7ec;--danger:#dc2626;--shadow:0 12px 35px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav{max-width:1180px;margin:auto;height:68px;padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px}
+.logo{width:40px;height:40px;border-radius:11px;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:900}
+.nav-right{display:flex;gap:8px}
+.icon-btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 12px}
+main{max-width:1180px;margin:0 auto;padding:30px 20px 60px}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;margin-bottom:25px}
+h1{font-size:clamp(34px,5vw,54px);line-height:1.03;margin:0 0 13px}
+.hero p{color:var(--muted);font-size:17px;line-height:1.6;margin:0}
+.hero-card{background:linear-gradient(135deg,#eff6ff,#fff);border:1px solid #dbeafe;border-radius:22px;padding:25px}
+.hero-card strong{display:block;font-size:18px;margin-bottom:10px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.feature{padding:15px;background:#fff;border:1px solid var(--border);border-radius:14px}
+.feature b{display:block;margin-bottom:5px}.feature span{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:8px;margin:20px 0 14px}
+.tab{padding:11px 16px;border:1px solid var(--border);background:#fff;border-radius:10px;font-weight:700}
+.tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:20px}
+.dropzone{border:2px dashed #b8c3d6;border-radius:16px;padding:42px 20px;text-align:center;background:#fbfcfe;transition:.2s}
+.dropzone.drag{border-color:var(--primary);background:#eff6ff}
+.drop-icon{font-size:42px;margin-bottom:8px}
+.dropzone h2{margin:5px 0 7px;font-size:21px}.dropzone p{margin:0 0 18px;color:var(--muted)}
+.primary{background:var(--primary);border:0;color:#fff;border-radius:10px;padding:12px 17px;font-weight:750}
+.primary:hover{background:var(--primary2)}
+.secondary{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 15px;font-weight:700}
+.file-input{display:none}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0 12px;flex-wrap:wrap}
+.count{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.page-card{position:relative;border:1px solid var(--border);border-radius:14px;background:#fff;overflow:hidden}
+.page-card.dragging{opacity:.45}
+.thumb{height:210px;background:#f1f3f6;display:grid;place-items:center;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:contain}
+.page-num{position:absolute;left:9px;top:9px;background:rgba(17,24,39,.78);color:#fff;padding:4px 8px;border-radius:8px;font-size:12px}
+.page-actions{display:flex;gap:6px;padding:9px}
+.page-actions button{flex:1;border:1px solid var(--border);background:#fff;border-radius:8px;padding:7px}
+.page-actions .delete{color:var(--danger)}
+.empty{text-align:center;color:var(--muted);padding:35px 10px}
+.settings{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.field select,.field input,.field textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;background:#fff;outline:none}
+.field textarea{min-height:220px;resize:vertical}
+.field select:focus,.field input:focus,.field textarea:focus{border-color:var(--primary)}
+.text-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.text-preview{border:1px solid var(--border);border-radius:12px;padding:25px;min-height:220px;background:#fff;white-space:pre-wrap;overflow:auto}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.notice{margin-top:15px;padding:12px 14px;border-radius:10px;background:#f8fafc;color:var(--muted);font-size:13px}
+.status{margin-top:12px;min-height:20px;color:var(--muted);font-size:14px}
+footer{border-top:1px solid var(--border);padding:25px 20px;color:var(--muted);text-align:center;font-size:13px}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:50;place-items:center;padding:18px}
+.modal.show{display:grid}
+.modal-box{width:min(520px,100%);background:#fff;border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}
+.close{border:0;background:#f2f4f7;border-radius:8px;padding:7px 10px}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.settings{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){
+ main{padding:20px 13px 45px}.nav{padding:0 13px}.features{grid-template-columns:1fr}
+ .settings,.text-layout{grid-template-columns:1fr}.hero-card{padding:18px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.thumb{height:180px}
+ .tabs{overflow:auto}.tab{white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">P</div><span>PDF Maker</span></div>
+    <div class="nav-right">
+      <button class="icon-btn" id="helpBtn">Help</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div>
+    <h1>Create PDFs.<br><span style="color:#2563eb">Simply.</span></h1>
+    <p>Turn images or text into clean PDF documents directly in your browser. Your selected files stay on your device while you work.</p>
+  </div>
+  <div class="hero-card">
+    <strong>Fast browser-based PDF maker</strong>
+    <div class="features">
+      <div class="feature"><b>🖼️ Images</b><span>Combine many images into one PDF.</span></div>
+      <div class="feature"><b>✍️ Text</b><span>Create a simple text document as PDF.</span></div>
+      <div class="feature"><b>📱 Responsive</b><span>Designed for phones and computers.</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="tabs">
+  <button class="tab active" data-tab="images">Images → PDF</button>
+  <button class="tab" data-tab="text">Text → PDF</button>
+</div>
+
+<section id="imagesPanel" class="panel">
+  <div id="dropzone" class="dropzone">
+    <div class="drop-icon">🖼️</div>
+    <h2>Drop images here</h2>
+    <p>JPG, JPEG, PNG, WEBP and GIF images are supported.</p>
+    <button class="primary" id="chooseBtn">Choose Images</button>
+    <input class="file-input" id="imageInput" type="file" accept="image/*" multiple>
+  </div>
+
+  <div class="toolbar">
+    <div class="count" id="count">No images selected</div>
+    <div>
+      <button class="secondary" id="addMoreBtn">＋ Add More</button>
+      <button class="secondary" id="clearBtn">Clear All</button>
+    </div>
+  </div>
+
+  <div id="imageGrid" class="grid"></div>
+  <div id="emptyState" class="empty">Your PDF pages will appear here.</div>
+
+  <div class="settings">
+    <div class="field"><label>Page size</label>
+      <select id="pageSize">
+        <option value="a4">A4</option><option value="a5">A5</option><option value="letter">Letter</option><option value="legal">Legal</option>
+      </select>
+    </div>
+    <div class="field"><label>Orientation</label>
+      <select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+    </div>
+    <div class="field"><label>Image fit</label>
+      <select id="fit"><option value="contain">Fit inside page</option><option value="cover">Fill page</option><option value="stretch">Stretch</option></select>
+    </div>
+    <div class="field"><label>Margin</label>
+      <select id="margin"><option value="0">No margin</option><option value="10" selected>10 mm</option><option value="20">20 mm</option><option value="30">30 mm</option></select>
+    </div>
+  </div>
+  <div class="actions"><button class="primary" id="makeImagePdf">⬇ Create Image PDF</button></div>
+  <div class="status" id="imageStatus"></div>
+</section>
+
+<section id="textPanel" class="panel" style="display:none">
+  <div class="text-layout">
+    <div>
+      <div class="field"><label>Document title</label><input id="docTitle" value="My Document" maxlength="120"></div>
+      <div class="field" style="margin-top:12px"><label>Your text</label><textarea id="textInput" placeholder="Type or paste your text here..."></textarea></div>
+    </div>
+    <div>
+      <div class="field"><label>Preview</label></div>
+      <div class="text-preview" id="textPreview">Your text preview will appear here.</div>
+    </div>
+  </div>
+  <div class="settings">
+    <div class="field"><label>Page size</label>
+      <select id="textPageSize"><option value="a4">A4</option><option value="a5">A5</option><option value="letter">Letter</option><option value="legal">Legal</option></select>
+    </div>
+    <div class="field"><label>Orientation</label>
+      <select id="textOrientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+    </div>
+    <div class="field"><label>Font size</label><select id="fontSize"><option>11</option><option selected>13</option><option>15</option><option>18</option><option>22</option></select></div>
+    <div class="field"><label>Margin</label><select id="textMargin"><option value="10">10 mm</option><option value="20" selected>20 mm</option><option value="30">30 mm</option></select></div>
+  </div>
+  <div class="actions"><button class="primary" id="makeTextPdf">⬇ Create Text PDF</button></div>
+  <div class="status" id="textStatus"></div>
+</section>
+
+<div class="notice">Privacy: this version processes your selected images and text locally in your browser. No upload server is required.</div>
+</main>
+
+<footer>© 2026 PDF Maker · Create PDFs directly in your browser</footer>
+
+<div class="modal" id="helpModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>How to use PDF Maker</h3><button class="close" id="closeHelp">✕</button></div>
+    <ol>
+      <li>Choose <b>Images → PDF</b> or <b>Text → PDF</b>.</li>
+      <li>For images, select multiple pictures or drag them into the box.</li>
+      <li>Drag a page card to reorder it.</li>
+      <li>Choose page size, orientation, fit and margin.</li>
+      <li>Press <b>Create PDF</b> to download your file.</li>
+    </ol>
+    <p style="color:#667085;font-size:13px">Tip: For large documents, use reasonably sized images to keep the final PDF smaller.</p>
+  </div>
+</div>
+
+<script>
+/* PDF Maker — production-style browser UI.
+   The PDF engine below is intentionally self-contained:
+   it writes a standards-compliant PDF using JPEG images and basic text.
+*/
+const pages=[];
+const $=id=>document.getElementById(id);
+
+function setStatus(id,msg,error=false){$(id).textContent=msg;$(id).style.color=error?'#dc2626':'#667085'}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  $('imagesPanel').style.display=tab==='images'?'block':'none';
+  $('textPanel').style.display=tab==='text'?'block':'none';
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+
+$('chooseBtn').onclick=()=>$('imageInput').click();
+$('addMoreBtn').onclick=()=>$('imageInput').click();
+
+$('imageInput').addEventListener('change',e=>{
+  addFiles([...e.target.files]); e.target.value='';
+});
+function addFiles(files){
+  files.filter(f=>f.type.startsWith('image/')).forEach(file=>{
+    pages.push({file,url:URL.createObjectURL(file),name:file.name});
+  });
+  renderPages();
+}
+const dz=$('dropzone');
+['dragenter','dragover'].forEach(e=>dz.addEventListener(e,x=>{x.preventDefault();dz.classList.add('drag')}));
+['dragleave','drop'].forEach(e=>dz.addEventListener(e,x=>{x.preventDefault();dz.classList.remove('drag')}));
+dz.addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
+
+function renderPages(){
+  $('imageGrid').innerHTML='';
+  $('emptyState').style.display=pages.length?'none':'block';
+  $('count').textContent=pages.length?`${pages.length} image${pages.length>1?'s':''} selected`:'No images selected';
+  pages.forEach((p,i)=>{
+    const card=document.createElement('div'); card.className='page-card'; card.draggable=true; card.dataset.index=i;
+    card.innerHTML=`<div class="thumb"><img src="${p.url}" alt=""></div><span class="page-num">Page ${i+1}</span>
+      <div class="page-actions">
+        <button title="Move left" ${i===0?'disabled':''}>←</button>
+        <button title="Move right" ${i===pages.length-1?'disabled':''}>→</button>
+        <button class="delete" title="Remove">Delete</button>
+      </div>`;
+    const btns=card.querySelectorAll('.page-actions button');
+    btns[0].onclick=()=>move(i,-1); btns[1].onclick=()=>move(i,1); btns[2].onclick=()=>removePage(i);
+    card.addEventListener('dragstart',()=>card.classList.add('dragging'));
+    card.addEventListener('dragend',()=>{card.classList.remove('dragging');renderPages()});
+    card.addEventListener('dragover',e=>e.preventDefault());
+    card.addEventListener('drop',e=>{
+      e.preventDefault(); const from=+card.dataset.index;
+      const dragged=document.querySelector('.dragging'); if(!dragged)return;
+      const to=+card.dataset.index;
+      if(from!==to){const [x]=pages.splice(from,1);pages.splice(to,0,x);renderPages()}
+    });
+    $('imageGrid').appendChild(card);
+  });
+}
+function move(i,d){const j=i+d;if(j<0||j>=pages.length)return;[pages[i],pages[j]]=[pages[j],pages[i]];renderPages()}
+function removePage(i){URL.revokeObjectURL(pages[i].url);pages.splice(i,1);renderPages()}
+$('clearBtn').onclick=()=>{pages.forEach(p=>URL.revokeObjectURL(p.url));pages.length=0;renderPages()};
+
+$('textInput').addEventListener('input',updatePreview);
+$('docTitle').addEventListener('input',updatePreview);
+function updatePreview(){
+  const t=$('textInput').value;
+  $('textPreview').textContent=t||'Your text preview will appear here.';
+  $('textPreview').style.fontSize=$('fontSize').value+'px';
+}
+$('fontSize').onchange=updatePreview;
+
+$('helpBtn').onclick=()=>$('helpModal').classList.add('show');
+$('closeHelp').onclick=()=>$('helpModal').classList.remove('show');
+$('helpModal').addEventListener('click',e=>{if(e.target===$('helpModal'))$('helpModal').classList.remove('show')});
+
+const sizes={
+ a4:[595.28,841.89],a5:[419.53,595.28],letter:[612,792],legal:[612,1008]
+};
+function pageDims(size,orientation){
+  let [w,h]=sizes[size]; return orientation==='landscape'?[h,w]:[w,h];
+}
+function escPdf(s){return String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/\r/g,'').replace(/\n/g,' ')}
+function imageData(file){
+ return new Promise((res,rej)=>{
+   const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=URL.createObjectURL(file);
+ });
+}
+function canvasJpeg(img,max=1800){
+ const scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+ const c=document.createElement('canvas');c.width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));c.height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+ c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+ return {data:c.toDataURL('image/jpeg',.88).split(',')[1],w:c.width,h:c.height};
+}
+function b64bytes(b64){const bin=atob(b64),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a}
+function makePdf(imageObjects, textPages, filename){
+  // imageObjects: [{data,w,h,pageW,pageH,margin,fit}]
+  const objs=[]; let id=1;
+  const catalog=id++,pagesId=id++, pageRefs=[];
+  const add=o=>{const n=id++;objs.push([n,o]);return n};
+  const imgRefs=[];
+  imageObjects.forEach(x=>{
+    const imgId=add(`<< /Type /XObject /Subtype /Image /Width ${x.w} /Height ${x.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${b64bytes(x.data).length} >>\nstream\n`);
+    imgRefs.push({id:imgId,bytes:b64bytes(x.data),...x});
+  });
+  let textIdx=0;
+  imageObjects.forEach((x,i)=>{
+    const contentId=id++;
+    const m=x.margin, pw=x.pageW, ph=x.pageH;
+    const availW=pw-2*m,availH=ph-2*m;
+    let dw=availW,dh=availH,dx=m,dy=m;
+    if(x.fit!=='stretch'){
+      const scale=x.fit==='cover'?Math.max(availW/x.w,availH/x.h):Math.min(availW/x.w,availH/x.h);
+      dw=x.w*scale;dh=x.h*scale;
+      dx=x.fit==='cover'?m+(availW-dw)/2:m+(availW-dw)/2;
+      dy=x.fit==='cover'?m+(availH-dh)/2:m+(availH-dh)/2;
+    }
+    const stream=`q\n${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${dx.toFixed(2)} ${dy.toFixed(2)} cm\n/Im${i+1} Do\nQ`;
+    objs.push([contentId,`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`]);
+    const pId=add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pw.toFixed(2)} ${ph.toFixed(2)}] /Resources << /XObject << /Im${i+1} ${imgRefs[i].id} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    pageRefs.push(pId);
+  });
+  if(textPages){
+    textPages.forEach((t,idx)=>{
+      const pw=t.pageW,ph=t.pageH,m=t.margin;
+      const lines=t.lines;
+      let y=ph-m-18; let parts=[];
+      parts.push('BT');parts.push(`/F1 ${t.font} Tf`);parts.push(`${m} ${y} Td`);
+      lines.forEach((line,j)=>{
+        if(j>0)parts.push(`0 -${t.lineHeight} Td`);
+        parts.push(`(${escPdf(line)}) Tj`);
+      });
+      parts.push('ET');
+      const stream=parts.join('\n'),cid=id++;
+      objs.push([cid,`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`]);
+      const pId=add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /Font << /F1 ${t.fontId} 0 R >> >> /Contents ${cid} 0 R >>`);
+      pageRefs.push(pId);
+    });
+  }
+  const fontId=add(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`);
+  // Patch text page font references after font is known.
+  for(const o of objs){
+    if(typeof o[1]==='string' && o[1].includes('FONT_PATCH')) o[1]=o[1].replace('FONT_PATCH',fontId+' 0 R');
+  }
+  // textPages weren't patched above because they used placeholder via caller construction; handle separately by replacing invalid refs.
+  for(const o of objs) if(typeof o[1]==='string') o[1]=o[1].replace(/undefined 0 R/g,fontId+' 0 R');
+  const kids=pageRefs.map(x=>x+' 0 R').join(' ');
+  objs.push([pagesId,`<< /Type /Pages /Kids [${kids}] /Count ${pageRefs.length} >>`]);
+  objs.push([catalog,`<< /Type /Catalog /Pages ${pagesId} 0 R >>`]);
+  objs.sort((a,b)=>a[0]-b[0]);
+  const chunks=[]; const header=new TextEncoder().encode('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n');chunks.push(header);
+  const offsets=new Array(id).fill(0);let pos=header.length;
+  for(const [n,body] of objs){
+    const head=new TextEncoder().encode(`${n} 0 obj\n`);
+    let bodyBytes;
+    const img=imgRefs.find(x=>x.id===n);
+    if(img) bodyBytes=concat([new TextEncoder().encode(body),img.bytes,new TextEncoder().encode('\nendstream\nendobj\n')]);
+    else bodyBytes=new TextEncoder().encode(body+'\nendobj\n');
+    offsets[n]=pos;const all=concat([head,bodyBytes]);chunks.push(all);pos+=all.length;
+  }
+  const xrefPos=pos;
+  let xref=`xref\n0 ${id}\n0000000000 65535 f \n`;
+  for(let i=1;i<id;i++)xref+=String(offsets[i]||0).padStart(10,'0')+' 00000 n \n';
+  xref+=`trailer\n<< /Size ${id} /Root ${catalog} 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+  chunks.push(new TextEncoder().encode(xref));
+  const blob=new Blob(chunks,{type:'application/pdf'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function concat(arrays){let len=arrays.reduce((s,a)=>s+a.length,0),out=new Uint8Array(len),p=0;for(const a of arrays){out.set(a,p);p+=a.length}return out}
+
+async function createImagePdf(){
+  if(!pages.length){setStatus('imageStatus','Please choose at least one image.',true);return}
+  const btn=$('makeImagePdf');btn.disabled=true;btn.textContent='Creating…';setStatus('imageStatus','Preparing images…');
+  try{
+    const [pw,ph]=pageDims($('pageSize').value,$('orientation').value), marginMm=+$('margin').value, margin=marginMm*72/25.4;
+    const fit=$('fit').value, arr=[];
+    for(let i=0;i<pages.length;i++){
+      setStatus('imageStatus',`Processing image ${i+1} of ${pages.length}…`);
+      const img=await imageData(pages[i].file),j=canvasJpeg(img);
+      arr.push({...j,pageW:pw,pageH:ph,margin,fit});
+    }
+    makePdf(arr,null,'PDF_Maker_Images.pdf');setStatus('imageStatus','PDF created successfully.');
+  }catch(e){console.error(e);setStatus('imageStatus','Could not create the PDF. Try smaller images.',true)}
+  btn.disabled=false;btn.textContent='⬇ Create Image PDF';
+}
+
+function wrapText(text,maxChars){
+  const out=[];
+  text.replace(/\r/g,'').split('\n').forEach(par=>{
+    if(par===''){out.push('');return}
+    let line='';
+    par.split(/\s+/).forEach(word=>{
+      if((line+' '+word).trim().length>maxChars){out.push(line);line=word}
+      else line=(line+' '+word).trim();
+    }); if(line)out.push(line);
+  }); return out;
+}
+function createTextPdf(){
+  const text=$('textInput').value.trim(),title=$('docTitle').value.trim()||'My Document';
+  if(!text){setStatus('textStatus','Please enter some text first.',true);return}
+  const [pw,ph]=pageDims($('textPageSize').value,$('textOrientation').value),margin=+$('textMargin').value*72/25.4;
+  const font=+$('fontSize').value,lineHeight=font*1.55,maxChars=Math.max(20,Math.floor((pw-2*margin)/(font*.52)));
+  const all=[title,'',...wrapText(text,maxChars)];
+  const linesPerPage=Math.max(1,Math.floor((ph-2*margin-20)/lineHeight)), chunks=[];
+  for(let i=0;i<all.length;i+=linesPerPage)chunks.push(all.slice(i,i+linesPerPage));
+  // Each page gets its own font reference placeholder fixed by makePdf.
+  const tp=chunks.map(lines=>({lines,font,lineHeight,pageW:pw,pageH:ph,margin,fontId:0}));
+  // makePdf expects a font object id but assigns one internally; use a placeholder then patch logic.
+  const btn=$('makeTextPdf');btn.disabled=true;btn.textContent='Creating…';
+  try{makePdf([],tp,title.replace(/[^\w\-]+/g,'_')+'.pdf');setStatus('textStatus','PDF created successfully.')}
+  catch(e){console.error(e);setStatus('textStatus','Could not create the PDF.',true)}
+  btn.disabled=false;btn.textContent='⬇ Create Text PDF';
+}
+$('makeImagePdf').onclick=createImagePdf;
+$('makeTextPdf').onclick=createTextPdf;
+renderPages();
+updatePreview();
+</script>
+</body>
+</html>
